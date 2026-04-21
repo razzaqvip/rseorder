@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background: #f3c68a;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px 0;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 40px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+      width: 320px;
+      padding: 30px 20px;
+      text-align: center;
+    }
+
+    .header-brand {
+      color: #ff3131;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .header-brand span {
+      display: block;
+      font-size: 12px;
+      color: #ff3131;
+      opacity: 0.8;
+    }
+
+    .input-group {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    label {
+      color: white;
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+      margin-left: 10px;
+      font-size: 13px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px 15px;
+      background: rgba(255, 255, 255, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      border-radius: 15px;
+      box-sizing: border-box;
+      color: #333;
+      outline: none;
+      font-size: 14px;
+    }
+
+    select option { background: #f3c68a; }
+
+    .location-wrapper {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-pin {
+      background: rgba(255, 255, 255, 0.4);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      border-radius: 15px;
+      cursor: pointer;
+      padding: 0 10px;
+    }
+
+    .btn-kirim {
+      margin-top: 15px;
+      width: 100%;
+      padding: 12px;
+      background: #ff3131;
+      border: none;
+      border-radius: 25px;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .btn-kirim:hover { background: #d92626; }
+  </style>
+</head>
+<body>
+
+<div class="glass-card">
+  <div class="header-brand">
+    <span>REMBANG</span>
+    SETRIKA EXPRESS
+  </div>
+
+  <div class="input-group">
+    <label>Nama Kamu</label>
+    <input type="text" id="nama" placeholder="James...">
+  </div>
+
+  <div class="input-group">
+    <label>Layanan</label>
+    <select id="layanan" onchange="updateSubLayanan()">
+      <option value="Setrika Kiloan">Setrika Wangi Kiloan</option>
+      <option value="Laundry Kiloan">Laundry Kiloan (Cuci Setrika)</option>
+      <option value="Setrika Satuan">Setrika Satuan (Pcs)</option>
+      <option value="Laundry Satuan">Laundry Satuan (Pcs)</option>
+    </select>
+  </div>
+
+  <div class="input-group">
+    <label id="labelSub">Pilih Paket/Kategori</label>
+    <select id="subLayanan"></select>
+  </div>
+
+  <div class="input-group">
+    <label id="labelJumlah">Estimasi Berat (Kg)</label>
+    <input type="number" id="jumlah" placeholder="3">
+  </div>
+
+  <div class="input-group">
+    <label>Alamat Penjemputan</label>
+    <div class="location-wrapper">
+      <input type="text" id="jemput" placeholder="Klik Pin > otomatis share lokasi">
+      <button class="btn-pin" onclick="ambilLokasi()">📍</button>
+    </div>
+  </div>
+
+  <div class="input-group">
+    <label>Alamat Pengantaran</label>
+    <input type="text" id="antar" placeholder="Ketik SAMA jika sama dengan alamat jemput">
+  </div>
+
+  <div class="input-group">
+    <label>Waktu Penjemputan</label>
+    <select id="waktu">
+      <option value="Pagi (09:00 - 12:00)">Pagi (09:00 - 12:00)</option>
+      <option value="Siang (12:00 - 15:00)">Siang (12:00 - 15:00)</option>
+      <option value="Sore (15:00 - 18:00)">Sore (15:00 - 18:00)</option>
+      <option value="Malam (19:00 - 22:00)">Malam (19:00 - 22:00)</option>
+    </select>
+  </div>
+
+  <button class="btn-kirim" onclick="kirimWA()">Kirim Order</button>
+</div>
+
+<script>
+const optionsData = {
+  "Setrika Kiloan": ["Reguler (3 Hari)", "Kilat (1 Hari)", "Express (1-6 Jam)"],
+  "Laundry Kiloan": ["Reguler (3 Hari)", "Kilat (1 Hari)"],
+  "Setrika Satuan": ["Atasan", "Bawahan", "Khusus", "Bedding/Linen"],
+  "Laundry Satuan": ["Atasan", "Bawahan", "Khusus", "Bedding/Linen"]
+};
+
+function updateSubLayanan() {
+  const layanan = document.getElementById('layanan').value;
+  const subSelect = document.getElementById('subLayanan');
+  const labelJumlah = document.getElementById('labelJumlah');
+  
+  subSelect.innerHTML = "";
+  optionsData[layanan].forEach(opt => {
+    let el = document.createElement("option");
+    el.value = opt; el.innerText = opt;
+    subSelect.appendChild(el);
+  });
+
+  labelJumlah.innerText = layanan.includes("Kiloan") ? "Estimasi Berat (Kg)" : "Estimasi Jumlah (Pcs)";
+}
+
+function ambilLokasi() {
+  const inputJemput = document.getElementById('jemput');
+  if (navigator.geolocation) {
+    inputJemput.value = "Mencari GPS...";
+    navigator.geolocation.getCurrentPosition(function(position) {
+      inputJemput.value = "https://www.google.com/maps?q=" + position.coords.latitude + "," + position.coords.longitude;
+    }, function() { alert("Gagal ambil lokasi."); inputJemput.value = ""; });
+  }
+}
+
+function kirimWA() {
+  const d = (id) => document.getElementById(id).value;
+  const noHP = "62895634087393"; 
+
+  if(!d('nama') || !d('jemput')) {
+    alert("Nama dan Lokasi Jemput wajib diisi!");
+    return;
+  }
+
+  let minimalNote = "";
+  if(d('layanan').includes("Kiloan") && d('jumlah') < 3) {
+    minimalNote = "%0A*(Catatan: Dibawah 3kg tetap dihitung tarif min. 3kg)*";
+  }
+
+  const pesan = "*REMBANG SETRIKA EXPRESS*%0A" +
+                "=========================%0A" +
+                "*Nama:* " + d('nama') + "%0A" +
+                "*Layanan:* " + d('layanan') + "%0A" +
+                "*Paket:* " + d('subLayanan') + "%0A" +
+                "*Estimasi Jumlah:* " + d('jumlah') + (d('layanan').includes("Kiloan") ? " Kg" : " Pcs") + "%0A" +
+                "*Jemput:* " + d('jemput') + "%0A" +
+                "*Antar:* " + d('antar') + "%0A" +
+                "*Waktu:* " + d('waktu') + "%0A" +
+                "=========================" + minimalNote + "%0A" +
+                "Mohon dikonfirmasi harganya ya Admin.";
+
+  window.open("https://wa.me/" + noHP + "?text=" + pesan, '_blank').focus();
+}
+
+window.onload = updateSubLayanan;
+</script>
+
+</body>
+</html>
